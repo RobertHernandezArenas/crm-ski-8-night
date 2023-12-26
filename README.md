@@ -1,5 +1,5 @@
 # crm-ski-8-night
-
+JSON Server API deployed VPS Server: https://apieverywhere.com/
 This template should help get you started developing with Vue 3 in Vite.
 
 ## Recommended IDE Setup
