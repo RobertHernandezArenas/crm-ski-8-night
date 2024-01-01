@@ -1,202 +1,142 @@
 <script setup>
 import { httpRequest } from '@/services';
-import { tools } from '@/tools';
-import { reactive } from 'vue';
-
-const registerStore = reactive({
-	api: {
-		baseUrl: 'https://apieverywhere.com',
-		endpoint: '/addUsuario',
-	},
-	title: 'Register',
-	formElements: {
-		name: {
-			placeholder: 'Name',
-			value: null,
-			hasError: false,
-			errorMessage: null,
-			errorTypeMessage: {
-				minLength: 'El nombre debe contener un mínimo de 2 carácteres',
-				maxLength: 'El nombre no debe exceder un máximo de 20 carácteres',
-				numberSpecialCharacters:
-					'El nombre no acepta números y carácteres especiales',
-			},
-			type: 'name',
-		},
-		surname: {
-			placeholder: 'Surname',
-			value: null,
-			hasError: false,
-			errorMessage: null,
-			errorTypeMessage: {
-				minLength: 'Los apellidos deben contener un mínimo de 2 carácteres',
-				maxLength:
-					'Los apellidos no deben exceder un máximo de 20 carácteres',
-				numberSpecialCharacters:
-					'Los apellidos no acepta números y carácteres especiales',
-			},
-			type: 'surname',
-		},
-		birthdate: {
-			name: 'Birthdate',
-			format: 'YYYY/MM/DD',
-			value: null,
-			hasError: false,
-			errorMessage: null,
-			errorTypeMessage: {
-				wrongFormat:
-					'El formato de la fecha de nacimiento no es correcto: YYYY/MM/DD',
-			},
-			type: 'birthdate',
-		},
-		button: {
-			name: 'Create new user',
-		},
-	},
-	errorForm: {
-		hasError: false,
-		message: null,
-		errorTypeMessage: {
-			required: 'Todos los campos son obligatorios',
-		},
-	},
-	limitations: {
-		min: 2,
-		max: 20,
-	},
-});
+import { computed, ref } from 'vue';
+import { registerStore } from '@/store/RegisterFrom.store';
+import { Validation } from '@/tools/Validation';
 
 // api
-const { baseUrl, endpoint } = registerStore.api;
+const { baseUrl, addUserEndpoint } = registerStore.api;
 
-// data inputs
-const { name, surname, birthdate, button } = registerStore.formElements;
+const buttonName = ref('Create user');
 
-// ErrorForm
-const errorForm = registerStore.errorForm;
-
-// Limitations
-const { limitations } = registerStore;
-
-const minLength = event => {
-	let input = event.target.value;
-	if (input.length < limitations.min && event.target.name === name.type) {
-		return (name.errorMessage = name.errorTypeMessage.minLength);
-	}
-	if (input.length < limitations.min && event.target.name === surname.type) {
-		return (surname.errorMessage = surname.errorTypeMessage.minLength);
-	}
-};
-
-const maxLength = event => {
-	let input = event.target.value;
-	if (input.length > limitations.max && event.target.name === name.type) {
-		return (name.errorMessage = name.errorTypeMessage.maxLength);
-	}
-	if (input.length > limitations.max && event.target.name === surname.type) {
-		return (surname.errorMessage = surname.errorTypeMessage.maxLength);
-	}
-};
-
-const sanitizeInputs = event => {
-	let input = event.target.value;
-	const noNumbers = tools.removeNumbers(input);
-	const noSymbols = tools.removeSymbols(noNumbers);
-
-	if (event.target.name == name.type) {
-		name.errorMessage = name.errorTypeMessage.numberSpecialCharacters;
-		return (name.value = noSymbols);
-	}
-	if ((event.target.name = surname.type)) {
-		surname.errorMessage = surname.errorTypeMessage.numberSpecialCharacters;
-		return (surname.value = noSymbols);
-	}
-};
-
-const resetMessges = () => {
-	birthdate.errorMessage = '';
-	name.errorMessage = '';
-	surname.errorMessage = '';
-	errorForm.message = '';
-};
-
-const addUser = async () => {
+// Input name validation
+const name = ref(null);
+const nameErrors = ref([]);
+const validationName = new Validation();
+const isValidName = computed(() => nameErrors.value.length >= 0);
+const validateNameInput = () => {
 	try {
-		if (!name.value || !surname.value || !birthdate.value) {
-			return (errorForm.message = errorForm.errorTypeMessage.required);
-		}
-		// Enviar el formulario al servidor
-		await httpRequest.post(baseUrl + endpoint, {
-			name: name.value,
-			surname: surname.value,
-			birthdate: birthdate.value,
-		});
-
-		// Limpiar los campos del formulario
-		name.value = null;
-		surname.value = null;
-		birthdate.value = null;
+		validationName.reset();
+		validationName.isRequired(name.value, 'Name');
+		validationName.isLength(name.value, 2, 20, 'Name');
+		validationName.hasSpecialCharacters(name.value, 'Name');
+		validationName.hasNumbers(name.value, 'Name');
+		// Actualizar los errores con los errores de la validación
+		nameErrors.value = [...validationName.errors];
 	} catch (error) {
 		console.log(error);
 	}
 };
+
+// Input surname validation
+const surname = ref(null);
+const surnameErrors = ref([]);
+const validationSurname = new Validation();
+const isValidSurname = computed(() => surnameErrors.value.length >= 0);
+const validateSurnameInput = () => {
+	try {
+		validationSurname.reset();
+		validationSurname.isRequired(surname.value, 'Surname');
+		validationSurname.isLength(surname.value, 2, 20, 'Surname');
+		validationSurname.hasSpecialCharacters(surname.value, 'Surname');
+		validationSurname.hasNumbers(surname.value, 'Surname');
+		// Actualizar los errores con los errores de la validación
+		surnameErrors.value = [...validationSurname.errors];
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+// Input birthdate validation
+const birthdate = ref(null);
+const birthdateErrors = ref([]);
+const validationBirthdate = new Validation();
+const isValidBirthdate = computed(() => birthdateErrors.value.length >= 0);
+const validateBirthdateInput = () => {
+	try {
+		validationBirthdate.reset();
+		validationBirthdate.isRequired(birthdate.value, 'Birthdate');
+		validationBirthdate.isLength(birthdate.value, 2, 20, 'Birthdate');
+		validationBirthdate.hasSpecialCharacters(birthdate.value, 'Birthdate');
+		validationBirthdate.hasNumbers(birthdate.value, 'Birthdate');
+		// Actualizar los errores con los errores de la validación
+		birthdateErrors.value = [...validationBirthdate.errors];
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+const addUser = async () => {
+	if (!name.value || !surname.value || !birthdate.value) {
+		throw new Error('hola error add user');
+	}
+	// Enviar el formulario al servidor
+	await httpRequest.post(baseUrl + addUserEndpoint, {
+		name: name.value,
+		surname: surname.value,
+		birthdate: birthdate.value,
+	});
+};
 </script>
 
 <template>
-	<a-form layout="vertical" class="register-form" autocomplte="off">
-		<fieldset class="register-form__fieldset">
-			<legend class="register-form__title">{{ registerStore.title }}</legend>
+	<a-form layout="vertical" class="register-form">
+		<legend class="register-form__title">{{ registerStore.title }}</legend>
+		<a-input
+			v-model:value="name"
+			size="large"
+			class="register-form__input"
+			placeholder="Name"
+			@input="validateNameInput"
+		/>
+		<div v-if="isValidName" class="register-form__error-list">
+			<p
+				v-for="error of nameErrors"
+				:key="error.id"
+				class="register-form_error"
+			>
+				* {{ error }}
+			</p>
+		</div>
 
-			<a-input
-				v-model:value="name.value"
-				size="large"
-				:name="name.type"
-				class="register-form__input"
-				:placeholder="name.placeholder"
-				@blur="maxLength"
-				@focus="minLength"
-				@input="sanitizeInputs"
-				@keydown="resetMessges"
-			/>
+		<a-input
+			v-model:value="surname"
+			size="large"
+			class="register-form__input"
+			placeholder="Surname"
+			@input="validateSurnameInput"
+		/>
+		<div v-if="isValidSurname" class="register-form__error-list">
+			<p
+				v-for="error of surnameErrors"
+				:key="error.id"
+				class="register-form_error"
+			>
+				* {{ error }}
+			</p>
+		</div>
 
-			<span class="register-form__error-message">{{
-				name.errorMessage
-			}}</span>
+		<a-date-picker
+			v-model:value="birthdate"
+			format="YY/MM/DD"
+			class="register-form__input"
+			@input="validateBirthdateInput"
+		/>
 
-			<a-input
-				v-model:value="surname.value"
-				size="large"
-				:name="surname.type"
-				class="register-form__input"
-				:placeholder="surname.placeholder"
-				@blur="minLength"
-				@focus="maxLength"
-				@input="sanitizeInputs"
-				@keydown="resetMessges"
-			/>
+		<div v-if="isValidBirthdate" class="register-form__error-list">
+			<p
+				v-for="error of birthdateErrors"
+				:key="error.id"
+				class="register-form_error"
+			>
+				* {{ error }}
+			</p>
+		</div>
 
-			<span class="register-form__error-message">{{
-				surname.errorMessage
-			}}</span>
-
-			<a-date-picker
-				v-model:value="birthdate.value"
-				:name="birthdate.type"
-				label="Selecciona tu fecha de nacimiento"
-				:format="birthdate.format"
-				class="register-form__input"
-			/>
-		</fieldset>
-		<br />
-
-		<span class="register-form__error-message">{{ errorForm.message }}</span>
-
-		<br />
 		<a-button
-			type="submit"
 			class="register-form__button"
 			@click.prevent="addUser(newUser)"
-			>{{ button.name }}</a-button
+			>{{ buttonName }}</a-button
 		>
 	</a-form>
 </template>
@@ -235,8 +175,15 @@ const addUser = async () => {
 	padding: 1rem;
 	width: 100%;
 }
+.register-form__error-list {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	width: 100%;
+}
 
-.register-form__error-message {
+.register-form_error {
+	text-align: left;
 	font-size: 0.9rem;
 	color: #ff5757;
 }

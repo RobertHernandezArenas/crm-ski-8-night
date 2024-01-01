@@ -6,7 +6,7 @@ export const tools = {
 		number = number.replaceAll(/\d+/gm, '');
 		return number;
 	},
-	removeSymbols(word) {
+	removeSpecialCharacters(word) {
 		return (word = word.replaceAll(
 			/[^\w\u00f1\u00d1\u00c7\u00e7\u0020]+|_/gm,
 			'',

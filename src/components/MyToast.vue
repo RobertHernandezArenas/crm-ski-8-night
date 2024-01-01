@@ -8,8 +8,8 @@ const props = defineProps({
 		type: Object,
 		default: () => {
 			return {
-				hasError: true,
 				title: 'Type Erorr Title',
+				delay: 4000,
 				message:
 					'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Harum, sed?mneehj soi uwerh uhwe',
 			};
@@ -23,12 +23,12 @@ const titleLimited = computed(() => {
 	return config.value.title.slice(0, 25);
 });
 const messageLimited = computed(() => {
-	return config.value.message.slice(0, 90);
+	return config.value.message?.slice(0, 90);
 });
 
 const closeToast = () => {
-	const buttonClose = document.querySelector('.toast');
-	buttonClose.classList.remove('show');
+	const toastBox = document.querySelector('.toast');
+	toastBox.classList.toggle('show');
 };
 </script>
 <template>
@@ -51,7 +51,7 @@ const closeToast = () => {
 <style scoped>
 .toast {
 	position: fixed;
-	top: 12%;
+	bottom: 12%;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -64,7 +64,7 @@ const closeToast = () => {
 	padding: 1rem 0.5rem;
 	border-radius: 0.35rem;
 	opacity: 0;
-	transform: translateX(100%);
+	transform: translateY(100%);
 	transition: all 0.45s ease-in-out;
 	z-index: 10;
 }
@@ -72,6 +72,10 @@ const closeToast = () => {
 .toast.show {
 	opacity: 1;
 	transform: translateX(0%);
+}
+.toast.hidden {
+	opacity: 0;
+	transform: translateX(100%);
 }
 
 .toast__icon {
