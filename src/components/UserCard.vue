@@ -21,8 +21,6 @@ const props = defineProps({
 const { userData } = toRefs(props);
 const { name, surname, birthdate, image } = userData.value;
 const now = new Date();
-const totalMonths = ref(12);
-const totalDays = ref(365);
 
 // Computed properties
 const fullName = computed(() => {
@@ -31,24 +29,6 @@ const fullName = computed(() => {
 
 const ageLetter = ref('años');
 const age = computed(() => getAge(now, birthdate));
-
-const monthLetter = ref('meses');
-const month = computed(() => {
-	return (
-		totalMonths.value -
-		(new Date(birthdate).getMonth() + 1) +
-		(now.getMonth() + 1)
-	);
-});
-
-const dayLetter = ref('dias');
-const day = computed(() => {
-	const birthday = new Date('2024-04-06');
-	return (
-		totalDays.value -
-		(new Date(birthday - now).getTime() / (1000 * 60 * 60 * 24)).toFixed(0)
-	);
-});
 </script>
 
 <template>
@@ -62,10 +42,7 @@ const day = computed(() => {
 			/>
 		</div>
 		<h1 class="user-card__name">{{ fullName }}</h1>
-		<p class="user-card__age">
-			{{ age }} {{ ageLetter }} {{ month }} {{ monthLetter }} {{ day }}
-			{{ dayLetter }}
-		</p>
+		<p class="user-card__age">{{ age }} {{ ageLetter }}</p>
 	</article>
 </template>
 
